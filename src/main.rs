@@ -1,6 +1,9 @@
 use futures::future;
 
 async fn add(a: i32, b: i32) -> i32 {
+    println!("Adding {} and {}", a, b);
+    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    println!("Finished adding {} and {}", a, b);
     a + b
 }
 
