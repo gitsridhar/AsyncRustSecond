@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use futures::future;
 
 async fn add(a: i32, b: i32) -> i32 {
@@ -7,6 +9,43 @@ async fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 
+fn add2(a: i32, b: i32) -> Number {
+    Number {
+        a,
+        b,
+        started: false,
+        sleep: Box::pin(tokio::time::sleep(Duration::from_secs(1))),
+    }
+}
+
+struct Number {
+    a: i32,
+    b: i32,
+    started: bool,
+    sleep: std::pin::Pin<Box<tokio::time::Sleep>>,
+}
+
+impl Future for Number {
+    type Output = i32;
+
+    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Self::Output> {
+        if !self.started {
+            println!("Starting to add {} and {}", self.a, self.b);
+            self.started = true;
+        }
+        // match std::pin::Pin::new(&mut self.sleep).poll(cx) {
+        //    std::task::Poll::Ready(_) => std::task::Poll::Ready(self.a + self.b),
+        //    std::task::Poll::Pending => std::task::Poll::Pending,
+        // }
+        if self.sleep.as_mut().poll(cx).is_pending() {
+            return std::task::Poll::Pending;
+        }
+        println!("Finished to add {} and {}", self.a, self.b);
+        std::task::Poll::Ready(self.a + self.b)
+    }
+}
+
+
 #[tokio::main]
 async fn main() {
     let result = add(5, 10).await;
@@ -14,7 +53,7 @@ async fn main() {
 
     let mut futures = Vec::new();
     for i in 0..5 {
-        futures.push(add(i, i * 2));
+        futures.push(add2(i, i * 2));
     }
 
     // let joined_future = future::join_all(futures);
