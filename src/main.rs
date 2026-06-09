@@ -29,6 +29,7 @@ impl Future for Number {
     type Output = i32;
 
     fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Self::Output> {
+        println!("Polling to add {} and {}", self.a, self.b);
         if !self.started {
             println!("Starting to add {} and {}", self.a, self.b);
             self.started = true;
@@ -38,6 +39,7 @@ impl Future for Number {
         //    std::task::Poll::Pending => std::task::Poll::Pending,
         // }
         if self.sleep.as_mut().poll(cx).is_pending() {
+            println!("Still waiting to add {} and {}", self.a, self.b);
             return std::task::Poll::Pending;
         }
         println!("Finished to add {} and {}", self.a, self.b);
@@ -45,20 +47,31 @@ impl Future for Number {
     }
 }
 
-
 #[tokio::main]
 async fn main() {
-    let result = add(5, 10).await;
-    println!("The result is: {}", result);
 
+    // Part 1:
+    let result = add(5, 10).await;
+    println!("** Part 1 : The result is: {}", result);
+
+    // Part 2:
+    let result1 = add2(3, 4).await;
+    let result2 = add2(5, 6).await;
+    let result3 = add2(7, 8).await;
+
+    println!("** Part 2 : Results: {}, {}, {}", result1, result2, result3);
+
+    // Part 3:
     let mut futures = Vec::new();
     for i in 0..5 {
         futures.push(add2(i, i * 2));
     }
 
+    // Alt code 1 for join_all:
     // let joined_future = future::join_all(futures);
     // joined_future.await;
 
+    // Alt code 2 for join_all:
     let results = future::join_all(futures).await;
-    println!("Results: {:?}", results);
+    println!("** Part 3 :Results: {:?}", results);
 }
