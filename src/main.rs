@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use futures::future;
 
-async fn add(a: i32, b: i32) -> i32 {
-    println!("Adding {} and {}", a, b);
+async fn add(attempt: i32, a: i32, b: i32) -> i32 {
+    println!("{} -> Adding {} and {}", attempt, a, b);
     tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     println!("Finished adding {} and {}", a, b);
     a + b
@@ -50,16 +50,22 @@ impl Future for Number {
 #[tokio::main]
 async fn main() {
 
-    // Part 1:
-    let result = add(5, 10).await;
+    // Part 1: Making call to add one at a time:
+    let result = add(1, 1, 10).await;
     println!("** Part 1 : The result is: {}", result);
+    let result = add(2, 5, 10).await;
+    println!("** Part 1 : The result is: {}", result);
+    let result = add(3, 3, 10).await;
+    println!("** Part 1 : The result is: {}", result);
+    let result = add(4, 4, 10).await;
+    println!("** Part 1 : The result is: {}\n", result);
 
     // Part 2:
     let result1 = add2(3, 4).await;
     let result2 = add2(5, 6).await;
     let result3 = add2(7, 8).await;
 
-    println!("** Part 2 : Results: {}, {}, {}", result1, result2, result3);
+    println!("** Part 2 : Results: {}, {}, {}\n", result1, result2, result3);
 
     // Part 3:
     let mut futures = Vec::new();
