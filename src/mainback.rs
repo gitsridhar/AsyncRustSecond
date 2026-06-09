@@ -107,7 +107,7 @@ stack backtrace:
                                at /Users/sridharvenkat/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/rt.rs:205:5
   33:        0x104546b58 - _main
      */
-    for i in 0..100000 {
+    for i in 0..10 {
         let handle = thread::spawn(move || {
             let result = add(i, i + 1);
             println!("Result of adding {} and {} is {}", i, i + 1, result);
